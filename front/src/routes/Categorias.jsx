@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Produtos from "./Produtos";
+import Swal from 'sweetalert2'
 
 const Categorias = () => {
   
@@ -9,8 +10,6 @@ const Categorias = () => {
     nomecat: "",
     taxa: "",
   });
-  console.log(novaCategoria)
-  const [erro, setErro] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -23,44 +22,83 @@ const Categorias = () => {
 
   const handleChange = (e) => {
     setNovaCategoria({
-      ...novaCategoria,
-      [e.target.name]: e.target.value,
+      ...novaCategoria, [e.target.name]: e.target.value,
     });
   };
 
+  const alertAdd = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Categoria Adicionada!",
+      showConfirmButton: false,
+      timer: 1500
+    });
+  }
+
+  const alertError = () => {
+    Swal.fire({
+      position: "center",
+      icon: "error",
+      title: "Oops...",
+      text: "Preencha corretamente Nome da Categoria e Taxa!",
+      showCloseButton: true,
+      showConfirmButton: false,
+      timer: 4000
+    });
+  }
+
+  const alertErrorEx = () => {
+    Swal.fire({
+      position: "center",
+      icon: "error",
+      title: "Oops...",
+      text: "Erro ao excluir categoria, pode ter produtos adicionados nesta categoria!",
+      showCloseButton: true,
+      showConfirmButton: false,
+      timer: 2500
+    });
+  }
+
+  const alertExc = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Categoria excluida!",
+      showConfirmButton: false,
+      timer: 1500
+    });
+  }
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
       .post("http://localhost/pages/categorias.php", novaCategoria)
       .then((response) => {
-        if (response.data.success) {
-
-          setCategorias([...categorias, novaCategoria]);
+        
+        if (response.status==200) {
+          setCategorias([...categorias, response.data]);
           setNovaCategoria({ categoria: "", Taxa: "" });
-
-          setErro("");
-          
-        } else {
-          setErro(response.data.error);
-          console.log(response.data);
-        }
+          alertAdd();
+        } 
       })
       .catch((error) => console.error("Erro ao adicionar categoria:", error));
       setIsModalOpen(false)
+      alertError();
   };
 
   const handleDelete = (id) => {
     axios
-      .delete(`http://localhost/pages/categorias.php?id=${id}`)
-      .then((response) => {
-        console.log(response.data);
-        if (response.data.success) {
+    
+    .delete(`http://localhost/pages/categorias.php?id=${id}`)
+    .then((response) => {
+        console.log(response);
+
+        if (response.status==200) {
           setCategorias(categorias.filter((cat) => cat.id !== id));
-        } else {
-          setErro(response.data.error);
+          alertExc();
         }
       })
-      .catch((error) => console.error("Erro ao deletar categoria:", error));
+      .catch((error) => console.error("Erro ao deletar categoria:", error + alertErrorEx()));
   };
 
   return (
@@ -76,7 +114,7 @@ const Categorias = () => {
         className=" mt-5 mb-5 block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         type="button"
       >
-        Adicionar Produto
+        Adicionar Nova Categoria
       </button>
       </div>
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-[60%] ml-[20%]">
@@ -194,7 +232,7 @@ const Categorias = () => {
                         name="taxa"
                         id="taxa"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-[209%] p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="100%"
+                        placeholder="Max (100%)"
                         onChange={handleChange}
                       />
                     </div>
@@ -217,7 +255,7 @@ const Categorias = () => {
                         clipRule="evenodd"
                       ></path>
                     </svg>
-                    Adicionar novo produto
+                    Adicionar Categoria
                   </button>
                 </form>
               </div>

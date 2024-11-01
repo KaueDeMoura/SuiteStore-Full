@@ -29,24 +29,28 @@ if ($method === "GET") {
         !empty($data["selectProduto"])
     ) {
         try {
-            $sql = "INSERT INTO public.carrinho (precound, quantidade, taxa, produto_nomeprod, total/*, amount*/) 
-                    VALUES (:precound, :quantidade, :taxa, :selectProduto, :total/*, :amount*/)";
+            $sql = "INSERT INTO public.carrinho (precound, quantidade, taxa, produto_nomeprod, total, amount) 
+                    VALUES (:precound, :quantidade, :taxa, :selectProduto, :total, :amount)";
             $stmt = $myPDO->prepare($sql);
 
             $data["total"] = $data["precound"]*$data["quantidade"];
 
-            /*$valorTaxa = $data["precound"] * $data["quantidade"];
-            $valorTaxaDivisao = $valorTaxa / 100;
-            $calctotal = $data["precound"] + $valorTaxaDivisao;
-            $data["amount"] = $calctotal;*/
+
+// Total : nao é o total final, é (Total * Quantidade)
+// amount : é a taxa do produto ex: Total=100 & Taxa=10 entao amount=== 10
+// taxa é a taxa da categoria do produto
+//                      2                100            2
+        $seila = $data["total"]*($data["taxa"]*$data["quantidade"])/100; 
+
+            $data["amount"] = $seila;
 
             $stmt->execute([
                 ":precound" => $data["precound"],
                 ":quantidade" => $data["quantidade"],
                 ":total" => $data["total"],
                 ":taxa" => $data["taxa"],
-                ":selectProduto" => $data["selectProduto"]//,
-                //":amount" => $data["amount"],
+                ":selectProduto" => $data["selectProduto"],
+                ":amount" => $data["amount"]
             ]);
             echo json_encode(["success" => "Produto adicionado com sucesso"]);
         } catch (Exception $e) {

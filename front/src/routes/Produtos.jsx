@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Swal from 'sweetalert2'
 
 const Produtos = () => {
   const [categorias, setCategorias] = useState([]);
@@ -11,7 +12,6 @@ const Produtos = () => {
     categoria_nomecat: "",
     imglink: "",
   });
-  console.log(novoProduto)
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -42,29 +42,61 @@ const Produtos = () => {
     });
   };
 
+  const alertAdd = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Categoria Adicionada!",
+      showConfirmButton: false,
+      timer: 1500
+    });
+  }
+
+  const alertError = () => {
+    Swal.fire({
+      position: "center",
+      icon: "error",
+      title: "Oops...",
+      text: "Preencha corretamente os dados!",
+      showCloseButton: true,
+      showConfirmButton: false,
+      timer: 4000
+    });
+  }
+
+  const alertExc = () => {
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "Produto excluid!",
+      showConfirmButton: false,
+      timer: 1500
+    });
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
       .post("http://localhost/pages/produtos.php", novoProduto)
       .then((response) => {
-        console.log(response.data.success || response.data.error);
+        if (response.status==200) {
         setProdutos([...produtos, novoProduto]);
-
-       //window.location.reload();
+        alertAdd();
+        }
       })
-      .catch((error) => alert("Erro ao adicionar produto:", error));
+      .catch((error) => console.error("Erro ao adicionar produto:", error));
       setIsModalOpen(false)
+      alertError();
   };
 
   const handleDelete = (id) => {
     axios
       .delete(`http://localhost/pages/produtos.php?id=${id}`)
       .then((response) => {
-        console.log(response.data.error);
-        if (response.data.success) {
+
+        if (response.status==200) {
           setProdutos(produtos.filter((prod) => prod.id !== id));
-        } else {
-          console.log(response.data.error);
+          alertExc();
         }
       })
       .catch((error) => console.error("Erro ao deletar categoria_nomecat:", error));
@@ -92,7 +124,7 @@ const Produtos = () => {
 
           <div
             id="crud-modal"
-            tabindex="-1"
+            tabIndex="-1"
             aria-hidden="true"
             className="flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
           >
@@ -129,7 +161,7 @@ const Produtos = () => {
                   <div className="grid gap-4 mb-4 grid-cols-2">
                     <div className="col-span-2">
                       <label
-                        for="nomeprod"
+                        htmlFor="nomeprod"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                       >
                         Nome
@@ -145,7 +177,7 @@ const Produtos = () => {
                     </div>
                     <div className="col-span-2 sm:col-span-1">
                       <label
-                        for="preco"
+                        htmlFor="preco"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                       >
                         Preço
@@ -163,7 +195,7 @@ const Produtos = () => {
                     </div>
                     <div className="col-span-2 sm:col-span-1">
                       <label
-                        for="quantidade"
+                        htmlFor="quantidade"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                       >
                         Quantidade
@@ -180,7 +212,7 @@ const Produtos = () => {
                   </div>
                   <div className=" mb-3 col-span-2">
                       <label
-                        for="imglink"
+                        htmlFor="imglink"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                       >
                         Link
@@ -196,7 +228,7 @@ const Produtos = () => {
                     </div>
                   <div className="col-span-2 sm:col-span-1">
                     <label
-                      for="category"
+                      htmlFor="category"
                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >
                       Categoria
@@ -205,11 +237,13 @@ const Produtos = () => {
                       name="categoria_nomecat"
                       onChange={handleChange}
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      defaultValue="categoria_nomecat"
                     >
                       
-                      <option disabled selected>
-                        Categoria
-                      </option>
+                      <option
+                        value="categoria_nomecat"
+                        disabled
+                    >Selecionar Categoria</option>
                       {Object.values(categorias).map((categorias) => (
                         <option>{categorias.nomecat}</option>
                       ))}
@@ -218,7 +252,6 @@ const Produtos = () => {
                   <button
                     type="submit"
                     className="mt-[5%] text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                    onClick={handleSubmit}
                   >
                     <svg
                       className="me-1 -ms-1 w-5 h-5"
@@ -227,9 +260,9 @@ const Produtos = () => {
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        fill-rule="evenodd"
+                        fillRule="evenodd"
                         d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                        clip-rule="evenodd"
+                        clipRule="evenodd"
                       ></path>
                     </svg>
                     Adicionar novo produto

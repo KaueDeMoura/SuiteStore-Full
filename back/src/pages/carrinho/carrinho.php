@@ -35,7 +35,7 @@ if ($method === "GET") {
                     VALUES (:precound, :quantidade, :taxa, :selectProduto, :total/*, :amount*/)";
             $stmt = $myPDO->prepare($sql);
 
-            $data["total"] = $data["precound"]*$data["quantidade"];
+            $data["total"] = $data["precound"] * $data["quantidade"];
 
             /*$valorTaxa = $data["precound"] * $data["quantidade"];
             $valorTaxaDivisao = $valorTaxa / 100;
@@ -50,6 +50,7 @@ if ($method === "GET") {
                 ":selectProduto" => $data["selectProduto"]//,
                 //":amount" => $data["amount"],
             ]);
+            $last_id = $myPDO->lastInsertId();
             echo json_encode(["success" => "Produto adicionado com sucesso"]);
         } catch (Exception $e) {
             echo json_encode([

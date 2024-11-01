@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Swal from 'sweetalert2'
 
 const Home = () => {
+
   const [carrinho, setCarrinho] = useState([]);
   const [historicos, setHistoricos] = useState([]);
   const [novoHistorico, setNovoHistorico] = useState({
@@ -27,41 +29,42 @@ const Home = () => {
       .catch((error) => console.error("Erro ao buscar historicos:", error));
   }, []);
 
-  const handleChange = (e) => {
-    setNovoHistorico({
-      ...novoHistorico,
-      [e.target.name]: e.target.value,
-    });
-  };
-
   const formatCurrency = (value) =>
     new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
     }).format(value);
 
+    const alertAdd = () => {
+      Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Ação Realizada com Sucesso!",
+        showConfirmButton: false,
+        timer: 1500
+      });
+    }
+
   const handleSubmit = () => {
     axios
       .post(`http://localhost/pages/carrinho/pedido.php`)
       .then((response) => {
-        console.log(response.data);
-        if (response.data.success) {
-        } else {
-          console.log(response);
-          console.log(response.data);
-          console.log(response.data.error);
+        console.log('Responde Status: - '+response.status)
+        if (response.status==200) {
+          alertAdd();
+          setTimeout(() => { window.location.reload() }, 1510)
         }
       })
-      .catch((error) => console.error("Erro ao deletar categoria:", error));
+      .catch((error) => console.error("Erro ao enviar ao historico:", error));
   };
 
   const handleDelete = (id) => {
     axios
       .delete(`http://localhost/pages/home/home.php?id=${id}`)
       .then((response) => {
-        console.log(response.data);
-        if (response.data.success) {
+        if (response.status==200) {
           setHistoricos(historicos.filter((cat) => cat.id !== id));
+          
         } else {
           console.log(response.data.error);
         }
@@ -73,15 +76,17 @@ const Home = () => {
     axios
       .delete(`http://localhost/pages/carrinho/pedido.php`)
       .then((response) => {
-        console.log(response.data);
-        if (response.data.success) {
+
+        if (response.status==200) {
+          alertAdd();
+          setTimeout(() => { window.location.reload() }, 1510)
         } else {
-          console.log(response);
           console.log(response.data);
-          console.log(response.data.error);
         }
       })
+      
       .catch((error) => console.error("Erro ao deletar categoria:", error));
+
   };
 
   return (
@@ -95,7 +100,7 @@ const Home = () => {
           <div className="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-8">
             <div className="mx-auto w-full flex-none lg:max-w-2xl xl:max-w-4xl">
               <div className="space-y-6">
-                {Object.values(historicos).map((historicos) => (
+                {historicos.length === 0 ? "O seu carrinho esta vazio" : Object.values(historicos).map((historicos) => (
                   <form>
                     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6">
                       <div className="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0">
@@ -170,7 +175,7 @@ const Home = () => {
                 ))}
               </div>
             </div>
-
+            {historicos.length === 0 ? "" : 
             <div className="mx-auto mt-6 max-w-4xl flex-1 space-y-6 lg:mt-0 lg:w-full">
               <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-6">
                 <p className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -195,7 +200,7 @@ const Home = () => {
                             Imposto
                           </dt>
                           <dd className="text-base font-medium text-gray-900 dark:text-white">
-                            {formatCurrency(carrinho.taxas)}
+                            {formatCurrency(carrinho.amount)}
                           </dd>
                         </dl>
                       </div>
@@ -208,10 +213,10 @@ const Home = () => {
                           {formatCurrency(carrinho.totalfinal)}
                         </dd>
                       </dl>
-
+                      
                       <dl className="flex items-center justify-between gap-4 pt-2 dark:border-gray-700">
                         <button
-                          type="submit"
+                          type="button"
                           className="inline-flex items-center text-sm font-medium text-green-600 hover:underline dark:text-green-500"
                           onClick={() => handleSubmit(carrinho)}
                         >
@@ -223,21 +228,21 @@ const Home = () => {
                             height="24"
                             fill="none"
                             viewBox="0 0 24 24"
-                          >
+                            >
                             <path
                               stroke="currentColor"
                               
                               
                               d="M7 18 20.94 6M6 18 1 11"
-                            />
+                              />
                           </svg>
                           Confirmar
                         </button>
                         <button
                           type="button"
                           className="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500"
-                          onClick={() => handleDeleteTudo(carrinho)}
-                        >
+                          onClick={() => handleDeleteTudo()}
+                          >
                           <svg
                             className="me-1.5 h-5 w-5"
                             aria-hidden="true"
@@ -246,13 +251,13 @@ const Home = () => {
                             height="24"
                             fill="none"
                             viewBox="0 0 24 24"
-                          >
+                            >
                             <path
                               stroke="currentColor"
                               
                               
                               d="M6 18 17.94 6M18 18 6.06 6"
-                            />
+                              />
                           </svg>
                           Remover
                         </button>
@@ -261,16 +266,17 @@ const Home = () => {
                   ))}
                 </div>
 
+
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
                     {" "}
                     ou{" "}
                   </span>
                   <a
-                    href="#"
+                    href="/"
                     title=""
                     className="inline-flex items-center gap-2 text-sm font-medium text-primary-700 underline hover:no-underline dark:text-primary-500"
-                  >
+                    >
                     Continue Compando
                     <svg
                       className="h-5 w-5"
@@ -278,18 +284,19 @@ const Home = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
-                    >
+                      >
                       <path
                         stroke="currentColor"
                         
                         
                         d="M19 12H5m14 0-4 4m4-4-4-4"
-                      />
+                        />
                     </svg>
                   </a>
                 </div>
               </div>
             </div>
+        }
           </div>
         </div>
       </section>

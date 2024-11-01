@@ -15,7 +15,7 @@ const Navbar = () => {
 
 <nav className="bg-white border-gray-200 dark:bg-gray-900">
   <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-    <a href="https://flowbite.com/" className="flex items-center space-x-3 rtl:space-x-reverse">
+    <a href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
         <img src="https://img.freepik.com/vetores-gratis/uma-letra-colorida-com-um-fundo-preto_483537-4543.jpg?t=st=1730201311~exp=1730204911~hmac=0c166efaa0020767629315187b2e6e30a165f350cf469e7e96ef1836d91ce4d8&w=740" className="h-8" alt="Flowbite Logo" />
         <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">SuiteStore</span>
     </a>

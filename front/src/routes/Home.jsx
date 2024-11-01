@@ -52,14 +52,15 @@ const Home = () => {
     axios
       .post("http://localhost/pages/home/home.php", carrinhoAtualizado)
       .then((response) => {
-        console.log(response.data.success || response.data.error);
+        if (response.status==200) {
         setCarrinhos([...carrinhos, carrinhoAtualizado]);
-        console.log(carrinhoAtualizado);
+        } else {
+          console.log(response.data);
+        }
       })
       .catch((error) => alert("Erro ao adicionar produto:", error));
   };
 
-  console.log(produtos)
   return (
     <div className="mb-4 grid gap-4 p-10 sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4">
       {Object.values(produtos).map((produto) => (
