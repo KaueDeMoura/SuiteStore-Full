@@ -18,7 +18,8 @@ if ($method === "GET") {
             "message" => $e->getMessage(),
         ]);
     }
-} elseif ($method === "POST") {
+}
+/*elseif ($method === "POST") {
     $data = json_decode(file_get_contents("php://input"), true);
 
     if (
@@ -62,7 +63,7 @@ if ($method === "GET") {
     } else {
         echo json_encode(["error" => "Dados inválidos"]);
     }
-} elseif ($method === "DELETE") {
+} */elseif ($method === "DELETE") {
     if (!empty($_GET["id"])) {
         $id = $_GET["id"];
         try {

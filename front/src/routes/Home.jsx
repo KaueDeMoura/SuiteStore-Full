@@ -50,15 +50,13 @@ const Home = () => {
       categoria: produto.categoria_nomecat,
     };
     axios
-      .post("http://localhost/pages/home/home.php", carrinhoAtualizado)
+      .post("http://localhost/pages/home/qtdeprod.php", carrinhoAtualizado)
       .then((response) => {
         if (response.status==200) {
         setCarrinhos([...carrinhos, carrinhoAtualizado]);
-        } else {
-          console.log(response.data);
         }
       })
-      .catch((error) => alert("Erro ao adicionar produto:", error));
+      .catch((error) => alert(error.response.data));
   };
 
   return (
@@ -138,6 +136,7 @@ const Home = () => {
                         <li className="flex items-center gap-2">
                           <input
                             type="number"
+                            min="1"
                             placeholder="1599"
                             name="quantidade"
                             id="quantidade"

@@ -8,12 +8,12 @@ $method = $_SERVER["REQUEST_METHOD"];
 
 $request_method = $_SERVER['REQUEST_METHOD'];
 if ($request_method == 'OPTIONS') {
-  Header("Access-Control-Allow-Methods: *");
-  die();
+    Header("Access-Control-Allow-Methods: *");
+    die();
 }
 
 if ($method === "GET") {
-    
+
     try {
         $consulta = $myPDO->query("SELECT sum(amount) as amount,
                                     sum(total) as totals, sum(taxa) as taxas,
@@ -60,17 +60,29 @@ if ($method === "GET") {
 
         if ($stmt->execute()) {
 
+            $sql_sum_qtde = "SELECT c.produto_nomeprod, sum(c.quantidade) as qtde, p.quantidade
+            FROM carrinho c
+            inner join produtos p on c.produto_nomeprod = p.nomeprod
+            GROUP BY c.produto_nomeprod, p.quantidade;";
+            $stmt_sum_qtde = $myPDO->prepare($sql_sum_qtde);
+            $stmt_sum_qtde->execute();
+            $result_sum_qtde = $stmt_sum_qtde->fetchALL(PDO::FETCH_ASSOC);
+
+            foreach ($result_sum_qtde as $option) {
+                $teste = $option['quantidade'] - $option['qtde'];
+                $nomeprodalt = $option['produto_nomeprod'];
+
+                $sql_update = "UPDATE produtos
+                SET quantidade = $teste
+                where nomeprod = '$nomeprodalt'";
+                $stmt_update = $myPDO->prepare($sql_update);
+                $stmt_update->execute();
+            }
             $sqlex = "TRUNCATE TABLE carrinho";
             $stmtex = $myPDO->prepare($sqlex);
             $stmtex->execute();
 
-            $sql_sum_qtde = "SELECT c.produto_nomeprod, sum(c.quantidade) as qtde, p.quantidade, c.amount
-                            FROM carrinho c
-                            inner join produtos p on c.produto_nomeprod = p.nomeprod
-                            GROUP BY c.produto_nomeprod, p.quantidade, c.amount;";
-            $stmt_sum_qtde = $myPDO->prepare($sql_sum_qtde);
-            $stmt_sum_qtde->execute();
-            $result_sum_qtde = $stmt_sum_qtde->fetchALL(PDO::FETCH_ASSOC);
+
         } else {
             http_response_code(401);
             echo "Falha ao adicionar itens ao histórico";

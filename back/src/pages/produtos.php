@@ -28,7 +28,7 @@ if ($method === 'GET') {
         !empty($data['preco']) > 0 &&
         !empty($data['quantidade']) &&
         !empty($data['categoria_nomecat']) &&
-        !empty($data['imglink'])
+        preg_match("/^https:\/\/([^\/]*)\/(.*)$/", $data['imglink'])
     ) {
         try {
             $msql = "INSERT INTO public.produtos(
